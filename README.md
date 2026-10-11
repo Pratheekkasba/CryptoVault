@@ -86,9 +86,10 @@ features need `MAIL_USERNAME` and `MAIL_PASSWORD`.
 - **Render:** Create a Docker web service with `Backend` as its root directory;
   Render will build `Backend/Dockerfile`. Add `TIDB_JDBC_URL`,
   `TIDB_USERNAME`, `TIDB_PASSWORD`, and the API/payment/email credentials as
-  Render environment variables. Set `APP_CORS_ALLOWED_ORIGINS` to the exact
-  deployed Vercel origin (comma-separated if there is more than one). Render's
-  `PORT` is used automatically.
+  Render environment variables. If setting `APP_CORS_ALLOWED_ORIGINS`, include
+  the exact deployed Vercel origin (comma-separated if there is more than one);
+  this value overrides the localhost and production defaults. Render's `PORT`
+  is used automatically.
 - **Vercel:** Import the repository with `Frontend` as the root directory and
   set `VITE_API_BASE_URL` to the deployed Render service URL, without a trailing
   slash. Redeploy after changing this build-time variable.

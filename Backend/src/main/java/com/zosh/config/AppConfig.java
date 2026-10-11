@@ -33,7 +33,7 @@ public class AppConfig {
 	@Autowired
 	private Environment environment;
 
-	@Value("${app.cors.allowed-origins:http://localhost:3000,http://localhost:5173,http://localhost:5174,http://localhost:4200}")
+	@Value("${app.cors.allowed-origins:http://localhost:3000,http://localhost:5173,http://localhost:5174,http://localhost:4200,https://crypto-vault-fawn.vercel.app}")
 	private String allowedOrigins;
 	
 	 @Bean

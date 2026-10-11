@@ -76,6 +76,9 @@ credentials in source files or Vite variables.
    `npm run dev` from `Frontend`.
 
 Razorpay payments need both a test Key ID and its matching test Key Secret.
+Set `FRONTEND_BASE_URL` to `http://localhost:5173` locally; on Render set it to
+`https://crypto-vault-fawn.vercel.app` so completed payments return to the
+deployed wallet.
 Google sign-in additionally needs OAuth client credentials configured as
 `SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_CLIENT_ID` and
 `SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_CLIENT_SECRET`. Email/OTP

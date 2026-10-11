@@ -9,7 +9,7 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 const TopupForm = () => {
-  const [amount, setAmount] = useState();
+  const [amount, setAmount] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("RAZORPAY");
   const { wallet } = useSelector((store) => store);
   const dispatch = useDispatch();
@@ -19,20 +19,28 @@ const TopupForm = () => {
   };
 
   const handleSubmit = () => {
+    const parsedAmount = Number(amount);
+    if (!Number.isSafeInteger(parsedAmount) || parsedAmount <= 0) {
+      return;
+    }
+
     dispatch(
       paymentHandler({
         jwt: localStorage.getItem("jwt"),
         paymentMethod,
-        amount,
+        amount: parsedAmount,
       })
     );
-    console.log(amount, paymentMethod);
   };
   return (
     <div className="pt-10 space-y-5">
       <div>
         <h1 className="pb-1">Enter Amount</h1>
         <Input
+          type="number"
+          min="1"
+          step="1"
+          required
           onChange={handleChange}
           value={amount}
           className="py-7 text-lg"
@@ -58,11 +66,8 @@ const TopupForm = () => {
               id="r1"
             />
             <Label htmlFor="r1">
-              <div className="bg-white rounded-md px-5 py-2 w-32">
-                <img
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Razorpay_logo.svg/1200px-Razorpay_logo.svg.png"
-                  alt=""
-                />
+              <div className="bg-white text-slate-900 font-semibold rounded-md px-5 py-2 w-32 text-center">
+                Razorpay
               </div>
             </Label>
           </div>
@@ -75,12 +80,8 @@ const TopupForm = () => {
               id="r2"
             />
             <Label htmlFor="r2">
-              <div className="bg-white rounded-md px-5 py- w-32">
-                <img
-                  className="h-10"
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/Stripe_Logo%2C_revised_2016.svg/768px-Stripe_Logo%2C_revised_2016.svg.png"
-                  alt=""
-                />
+              <div className="bg-white text-slate-900 font-semibold rounded-md px-5 py-2 w-32 text-center">
+                Stripe
               </div>
             </Label>
           </div>
@@ -91,11 +92,17 @@ const TopupForm = () => {
       ) : (
         <Button
           onClick={handleSubmit}
-          variant=""
+          variant="default"
+          disabled={!Number.isSafeInteger(Number(amount)) || Number(amount) <= 0}
           className="w-full py-7 text-xl"
         >
           Submit
         </Button>
+      )}
+      {wallet.error && (
+        <p role="alert" className="text-sm text-red-500">
+          {wallet.error}
+        </p>
       )}
     </div>
   );

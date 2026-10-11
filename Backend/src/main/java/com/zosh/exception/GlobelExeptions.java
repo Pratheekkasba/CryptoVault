@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 
@@ -27,6 +28,15 @@ public class GlobelExeptions {
 				request.getDescription(false),
 				LocalDateTime.now());
 		return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+	}
+
+	@ExceptionHandler(ResponseStatusException.class)
+	public ResponseEntity<ErrorDetails> handleResponseStatusException(
+			ResponseStatusException ex, WebRequest request) {
+		ErrorDetails error = new ErrorDetails(ex.getReason(),
+				request.getDescription(false),
+				LocalDateTime.now());
+		return new ResponseEntity<>(error, ex.getStatusCode());
 	}
 
 	@ExceptionHandler(Exception.class)

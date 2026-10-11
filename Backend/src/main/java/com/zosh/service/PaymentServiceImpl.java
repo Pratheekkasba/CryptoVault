@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -38,6 +39,23 @@ public class PaymentServiceImpl implements PaymentService{
     @Autowired
     private PaymentOrderRepository paymentOrderRepository;
 
+    @Override
+    public void validatePaymentConfiguration(PaymentMethod paymentMethod) {
+        if (paymentMethod == PaymentMethod.RAZORPAY
+                && (apiKey == null || apiKey.isBlank() || apiSecret == null || apiSecret.isBlank())) {
+            throw new ResponseStatusException(
+                    HttpStatus.SERVICE_UNAVAILABLE,
+                    "Razorpay is not configured. Add both RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET to Backend/.env."
+            );
+        }
+        if (paymentMethod == PaymentMethod.STRIPE
+                && (stripeSecretKey == null || stripeSecretKey.isBlank())) {
+            throw new ResponseStatusException(
+                    HttpStatus.SERVICE_UNAVAILABLE,
+                    "Stripe is not configured. Add STRIPE_SECRET_KEY to Backend/.env."
+            );
+        }
+    }
 
     @Override
     public PaymentOrder createOrder(User user, Long amount, PaymentMethod paymentMethod) {

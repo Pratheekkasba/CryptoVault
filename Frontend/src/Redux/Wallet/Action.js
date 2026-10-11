@@ -77,7 +77,7 @@ export const depositMoney =
       console.error(error);
       dispatch({
         type: types.DEPOSIT_MONEY_FAILURE,
-        error: error.message,
+        error: error.response?.data?.message || error.message,
       });
     }
   };

@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 public class PaymentController {
@@ -36,6 +37,11 @@ public class PaymentController {
             @PathVariable Long amount,
             @RequestHeader("Authorization") String jwt) throws UserException, RazorpayException, StripeException {
 
+        if (amount <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Top-up amount must be greater than zero.");
+        }
+
+        paymentService.validatePaymentConfiguration(paymentMethod);
         User user = userService.findUserProfileByJwt(jwt);
 
         PaymentResponse paymentResponse;

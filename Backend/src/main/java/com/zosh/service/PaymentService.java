@@ -9,6 +9,8 @@ import com.zosh.response.PaymentResponse;
 
 public interface PaymentService {
 
+    void validatePaymentConfiguration(PaymentMethod paymentMethod);
+
     PaymentOrder createOrder(User user, Long amount, PaymentMethod paymentMethod);
 
     PaymentOrder getPaymentOrderById(Long id) throws Exception;

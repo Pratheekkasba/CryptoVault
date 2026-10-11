@@ -5,8 +5,11 @@ import com.zosh.model.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
@@ -22,9 +25,16 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.stream.Collectors;
 
 @Configuration
 public class AppConfig {
+
+	@Autowired
+	private Environment environment;
+
+	@Value("${app.cors.allowed-origins:http://localhost:3000,http://localhost:5173,http://localhost:5174,http://localhost:4200}")
+	private String allowedOrigins;
 	
 	 @Bean
 	    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -35,8 +45,15 @@ public class AppConfig {
 	                                .requestMatchers("/api/**").authenticated()
 	                                
 	                                .anyRequest().permitAll()
-	                )
-					.oauth2Login(oauth->{
+	                );
+
+	        String googleClientId = environment.getProperty(
+	                "spring.security.oauth2.client.registration.google.client-id");
+	        String googleClientSecret = environment.getProperty(
+	                "spring.security.oauth2.client.registration.google.client-secret");
+	        if (googleClientId != null && !googleClientId.isBlank()
+	                && googleClientSecret != null && !googleClientSecret.isBlank()) {
+	            http.oauth2Login(oauth->{
 						oauth.loginPage("/login/google");
 						oauth.authorizationEndpoint(authorization->
 								authorization.baseUri("/login/oauth2/authorization"));
@@ -69,7 +86,10 @@ public class AppConfig {
 
 							}
 						});
-					})
+					});
+	        }
+
+	        http
 	                .addFilterBefore(new JwtTokenValidator(), BasicAuthenticationFilter.class)
 	                .csrf(csrf -> csrf.disable())
 	                .cors(cors -> cors.configurationSource(corsConfigurationSource()));
@@ -85,13 +105,10 @@ public class AppConfig {
 	            @Override
 	            public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
 	                CorsConfiguration cfg = new CorsConfiguration();
-	                cfg.setAllowedOrigins(Arrays.asList(
-	                    "http://localhost:3000",
-	                    "http://localhost:5173",
-						"http://localhost:5174",
-	                    "http://localhost:4200",
-							"https://zosh-treading.vercel.app"
-	                ));
+	                cfg.setAllowedOriginPatterns(Arrays.stream(allowedOrigins.split(","))
+	                        .map(String::trim)
+	                        .filter(origin -> !origin.isEmpty())
+	                        .collect(Collectors.toList()));
 	                cfg.setAllowedMethods(Collections.singletonList("*"));
 	                cfg.setAllowCredentials(true);
 	                cfg.setAllowedHeaders(Collections.singletonList("*"));

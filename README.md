@@ -60,12 +60,41 @@
 4. Build the Docker image.
 5. Run the Docker container.
 
-## Installation 🛠️
+## Local setup
 
-1. Clone the repository.
-2. Install the required dependencies.
-3. Configure your environment variables for API keys and database connections.
-4. Run the application.
+The backend uses TiDB Cloud through its MySQL-compatible JDBC driver. Do not put
+credentials in source files or Vite variables.
+
+1. Copy `Backend/.env.example` to `Backend/.env` and fill in the TiDB connection
+   details and API credentials. Use the TiDB connection host, port `4000`,
+   username, and password from TiDB Cloud; the application connects to its
+   `cryptovault` database (not TiDB's protected `sys` system database). Keep
+   `sslMode=VERIFY_IDENTITY` in the JDBC URL.
+2. In a terminal, run the backend from `Backend` with `mvn spring-boot:run`.
+   It listens on port `5454` locally.
+3. Copy `Frontend/.env.example` to `Frontend/.env`, then run `npm install` and
+   `npm run dev` from `Frontend`.
+
+Razorpay payments need both a test Key ID and its matching test Key Secret.
+Google sign-in additionally needs OAuth client credentials configured as
+`SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_CLIENT_ID` and
+`SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_CLIENT_SECRET`. Email/OTP
+features need `MAIL_USERNAME` and `MAIL_PASSWORD`.
+
+## Deployment
+
+- **Render:** Create a Docker web service with `Backend` as its root directory;
+  Render will build `Backend/Dockerfile`. Add `TIDB_JDBC_URL`,
+  `TIDB_USERNAME`, `TIDB_PASSWORD`, and the API/payment/email credentials as
+  Render environment variables. Set `APP_CORS_ALLOWED_ORIGINS` to the exact
+  deployed Vercel origin (comma-separated if there is more than one). Render's
+  `PORT` is used automatically.
+- **Vercel:** Import the repository with `Frontend` as the root directory and
+  set `VITE_API_BASE_URL` to the deployed Render service URL, without a trailing
+  slash. Redeploy after changing this build-time variable.
+
+Keep `.env` files out of Git and never put private API/database credentials in
+`VITE_*` variables; Vite embeds those values in browser assets.
 
 ## Usage 🚀
 
